@@ -30,6 +30,29 @@ spring:
             maxAge: 3600
 
       routes:
+        # ── API Docs sin JWT (Swagger agregado) ───────────────
+        - id: auth-api-docs
+          uri: lb://ms-auth-security
+          predicates:
+            - Path=/api/auth/v3/api-docs
+          filters:
+            - RewritePath=/api/auth/v3/api-docs, /v3/api-docs
+
+        - id: maestros-api-docs
+          uri: lb://ms-core-maestros
+          predicates:
+            - Path=/api/maestros/v3/api-docs
+          filters:
+            - RewritePath=/api/maestros/v3/api-docs, /v3/api-docs
+
+        - id: ventas-api-docs
+          uri: lb://ms-ventas
+          predicates:
+            - Path=/api/ventas/v3/api-docs
+          filters:
+            - RewritePath=/api/ventas/v3/api-docs, /v3/api-docs
+
+        # ── Rutas de negocio ──────────────────────────────────
         - id: ms-auth-security
           uri: lb://ms-auth-security
           predicates:
@@ -83,9 +106,6 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     urls:
-      - name: Auth
-        url: /api/auth/v3/api-docs
-      - name: Maestros
-        url: /api/maestros/v3/api-docs
-      - name: Ventas
-        url: /api/ventas/v3/api-docs
+      - name: Restaurant API - Todos los endpoints
+        url: /v3/api-docs
+    urls-primary-name: Restaurant API - Todos los endpoints

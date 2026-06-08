@@ -1,0 +1,16 @@
+# Configuración SOLO para tests de integración
+# Se activa con @ActiveProfiles("test")
+spring:
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+  flyway:
+    enabled: false        # Flyway OFF en tests — usa ddl-auto + TestDataSeeder
+
+logging:
+  level:
+    com.restaurant: WARN  # Menos ruido en logs de test
+    org.hibernate: WARN
+    org.flywaydb: WARN

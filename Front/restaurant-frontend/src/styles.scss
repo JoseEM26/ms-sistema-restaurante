@@ -1,114 +1,115 @@
-// AG Grid v34 - NO importar CSS legacy (usa Theming API)
+// ── Design Tokens (fuente única de verdad) ─────────
+@use 'app/core/design/tokens';
 
-// Tailwind
+// ── Tailwind ────────────────────────────────────────
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-// Ionic variables
-:root {
-  --ion-color-primary:         #f97316;
-  --ion-color-primary-rgb:     249, 115, 22;
-  --ion-color-primary-shade:   #ea580c;
-  --ion-color-primary-tint:    #fb923c;
-  --ion-color-secondary:       #1e293b;
-  --ion-color-secondary-rgb:   30, 41, 59;
-  --ion-color-secondary-shade: #0f172a;
-  --ion-color-secondary-tint:  #334155;
-  --ion-color-success:         #22c55e;
-  --ion-color-warning:         #eab308;
-  --ion-color-danger:          #ef4444;
-  --ion-background-color:      #f1f5f9;
-  --ion-text-color:            #1e293b;
-  --ion-font-family:           'Inter', system-ui, sans-serif;
+// ── AG Grid v34 Theming API (sin CSS legacy) ────────
+// El tema se define programáticamente en AppTableComponent
+
+// ── Reset / Base ─────────────────────────────────────
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  font-family: var(--font-family, 'Inter', sans-serif);
+  background: var(--content-bg);
+  color: var(--gray-800);
+  -webkit-font-smoothing: antialiased;
 }
 
-// Layout global
-ion-content { --background: #f1f5f9; }
-ion-toolbar  { --background: #1e293b; --color: #ffffff; }
+ion-content { --background: var(--content-bg); }
 
-// Componentes reutilizables
+// ── Componentes reutilizables ─────────────────────────
 @layer components {
+
+  // Cards
   .card {
-    @apply bg-white rounded-2xl p-6 border border-gray-100;
-    box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+    background: var(--white);
+    border-radius: 16px;
+    border: 1px solid var(--gray-200);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
   }
-
-  .page-header {
-    @apply flex items-center justify-between mb-6;
-    h1 { @apply text-2xl font-bold text-slate-800; }
-    p  { @apply text-sm text-slate-500 mt-0.5; }
-  }
-
-  // KPI cards
-  .kpi-card {
-    @apply card flex items-center gap-4;
-    .kpi-icon {
-      @apply w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0;
-    }
-    .kpi-value { @apply text-2xl font-bold text-slate-800 leading-none; }
-    .kpi-label { @apply text-xs text-slate-500 mt-1; }
-  }
+  .card-sm { @extend .card; padding: 16px; border-radius: 12px; }
 
   // Badges de estado
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
-    &-success  { @apply bg-green-100  text-green-800; }
-    &-warning  { @apply bg-amber-100  text-amber-800; }
-    &-danger   { @apply bg-red-100    text-red-800; }
-    &-info     { @apply bg-blue-100   text-blue-800; }
-    &-gray     { @apply bg-gray-100   text-gray-700; }
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+
+    &-success { background: #dcfce7; color: #15803d; }
+    &-warning { background: #fef3c7; color: #b45309; }
+    &-danger  { background: #fee2e2; color: #b91c1c; }
+    &-info    { background: #dbeafe; color: #1d4ed8; }
+    &-gray    { background: var(--gray-100); color: var(--gray-600); }
+    &-orange  { background: var(--primary-100); color: var(--primary-dark); }
   }
 
-  // Botones
+  // Botones base
   .btn {
-    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all;
-    &-primary   { @apply bg-orange-500 text-white hover:bg-orange-600 shadow-sm; }
-    &-secondary { @apply bg-slate-800  text-white hover:bg-slate-700  shadow-sm; }
-    &-outline   { @apply border border-slate-300 text-slate-700 hover:bg-slate-50; }
-    &-ghost     { @apply text-slate-600 hover:bg-slate-100; }
-    &-danger    { @apply bg-red-500 text-white hover:bg-red-600; }
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+
+    &-primary {
+      background: var(--primary);
+      color: var(--white);
+      box-shadow: 0 2px 8px rgba(249,115,22,.3);
+      &:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(249,115,22,.4); }
+      &:active { transform: translateY(0); }
+    }
+
+    &-outline {
+      background: transparent;
+      color: var(--gray-700);
+      border: 1px solid var(--gray-200);
+      &:hover { background: var(--gray-50); border-color: var(--gray-300); }
+    }
+
+    &-ghost {
+      background: transparent;
+      color: var(--gray-500);
+      &:hover { background: var(--gray-100); color: var(--gray-800); }
+    }
+
+    &-danger {
+      background: var(--danger);
+      color: var(--white);
+      &:hover { background: #dc2626; }
+    }
+
+    &-sm { padding: 5px 12px; font-size: 12px; border-radius: 6px; }
+    &-icon { padding: 8px; border-radius: 8px; }
   }
 }
 
-// AG Grid tema personalizado
-.ag-theme-restaurant {
-  --ag-header-background-color:       #1e293b;
-  --ag-header-foreground-color:       #ffffff;
-  --ag-header-column-separator-color: #334155;
-  --ag-row-hover-color:               #fff7ed;
-  --ag-selected-row-background-color: #fed7aa;
-  --ag-odd-row-background-color:      #fafafa;
-  --ag-row-border-color:              #f1f5f9;
-  --ag-cell-horizontal-padding:       16px;
-  --ag-font-family:                   'Inter', sans-serif;
-  --ag-font-size:                     13px;
-  --ag-border-color:                  #e2e8f0;
-  --ag-wrapper-border-radius:         12px;
-  --ag-row-height:                    44px;
-  --ag-header-height:                 44px;
+// ── Scrollbar personalizada ────────────────────────────
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gray-300); }
 
-  .ag-root-wrapper { border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
-  .ag-header-cell-label { font-weight: 600; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
-  .ag-paging-panel { border-top: 1px solid #e2e8f0; padding: 8px 16px; background: #fafafa; }
+// ── Animaciones ────────────────────────────────────────
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
-// Sidebar Ionic tweaks
-ion-menu ion-content { --background: #0f172a; }
-ion-menu ion-list    { background: transparent; }
-ion-menu ion-item {
-  --background: transparent;
-  --color: #94a3b8;
-  --border-color: transparent;
-  border-radius: 10px;
-  margin: 2px 8px;
-  font-size: 14px;
-  font-weight: 500;
-  &.active-item, &.router-link-active {
-    --background: rgba(249,115,22,.15);
-    --color: #f97316;
-    ion-icon { color: #f97316 !important; }
-  }
-  &:hover:not(.router-link-active) { --background: rgba(255,255,255,.06); --color: #e2e8f0; }
-  ion-icon { color: #64748b; }
-}
+.animate-in { animation: fadeIn .25s ease forwards; }

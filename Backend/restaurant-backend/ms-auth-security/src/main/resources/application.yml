@@ -41,6 +41,9 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+  servers:
+    - url: http://localhost:8080
+      description: API Gateway (usa este para probar)
 
 management:
   endpoints:

@@ -6,19 +6,19 @@ scrape_configs:
   - job_name: 'ms-core-maestros'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['host.docker.internal:8082']
+      - targets: ['ms-maestros:8082']
 
   - job_name: 'ms-ventas'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['host.docker.internal:8083']
+      - targets: ['ms-ventas:8083']
 
   - job_name: 'ms-auth-security'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['host.docker.internal:8081']
+      - targets: ['ms-auth:8081']
 
   - job_name: 'api-gateway'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['host.docker.internal:8080']
+      - targets: ['api-gateway:8080']

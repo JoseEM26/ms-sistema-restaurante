@@ -50,4 +50,7 @@ application-local.yml
 docker-volumes/
 
 # ── Claude Code ────────────────────────────────────
-.claude/settings.local.json
+.claude/
+settings.local.json
+memory/
+MEMORY.md

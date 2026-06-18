@@ -1,0 +1,377 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#  RESTAURANT — Stack completo en Docker
+#  No necesitas Java, Node ni Maven instalado localmente.
+#
+#  Levantar todo:   docker-compose up --build -d
+#  Ver logs:        docker-compose logs -f
+#  Parar todo:      docker-compose down -v
+# ═══════════════════════════════════════════════════════════════════════════════
+
+services:
+
+  # ── Base de datos ────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: restaurant-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/01-init-db.sql:ro
+    ports:
+      - "5433:5432"   # 5433 en host para no chocar con PostgreSQL local
+    networks:
+      - restaurant-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  # ── Message Broker ───────────────────────────────────────────────────────────
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: restaurant-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_ERLANG_COOKIE: "restaurant-cookie-2024"
+    ports:
+      - "5672:5672"
+      - "15672:15672"       # http://localhost:15672  (guest/guest)
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - restaurant-net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
+
+  # ── Cache / Rate Limiting ────────────────────────────────────────────────────
+  redis:
+    image: redis:7.2-alpine
+    container_name: restaurant-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - restaurant-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ── Service Discovery ────────────────────────────────────────────────────────
+  eureka-server:
+    build:
+      context: ./Backend/restaurant-backend
+      dockerfile: eureka-server/Dockerfile
+    container_name: restaurant-eureka
+    environment:
+      EUREKA_INSTANCE_HOSTNAME: eureka-server
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m"
+    ports:
+      - "8761:8761"
+    networks:
+      - restaurant-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8761/actuator/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 15
+      start_period: 90s
+
+  # ── Config Server ────────────────────────────────────────────────────────────
+  config-server:
+    build:
+      context: ./Backend/restaurant-backend
+      dockerfile: config-server/Dockerfile
+    container_name: restaurant-config
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m"
+    ports:
+      - "8888:8888"
+    networks:
+      - restaurant-net
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8888/actuator/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 15
+      start_period: 90s
+
+  # ── Auth Microservice ────────────────────────────────────────────────────────
+  ms-auth:
+    build:
+      context: ./Backend/restaurant-backend
+      dockerfile: ms-auth-security/Dockerfile
+    container_name: restaurant-auth
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/db_auth
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m"
+    ports:
+      - "8081:8081"
+    networks:
+      - restaurant-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+
+  # ── Core Maestros Microservice ───────────────────────────────────────────────
+  ms-maestros:
+    build:
+      context: ./Backend/restaurant-backend
+      dockerfile: ms-core-maestros/Dockerfile
+    container_name: restaurant-maestros
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/db_maestros
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m"
+    ports:
+      - "8082:8082"
+    networks:
+      - restaurant-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+
+  # ── Ventas Microservice ──────────────────────────────────────────────────────
+  ms-ventas:
+    build:
+      context: ./Backend/restaurant-backend
+      dockerfile: ms-ventas/Dockerfile
+    container_name: restaurant-ventas
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/db_ventas
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: "5672"
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m"
+    ports:
+      - "8083:8083"
+    networks:
+      - restaurant-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8083/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+
+  # ── Notificaciones Microservice ──────────────────────────────────────────────
+  ms-notif:
+    build:
+      context: ./Backend/restaurant-backend
+      dockerfile: ms-notificaciones/Dockerfile
+    container_name: restaurant-notif
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: "5672"
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m"
+    ports:
+      - "8084:8084"
+    networks:
+      - restaurant-net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+
+  # ── Reportes Microservice ────────────────────────────────────────────────────
+  ms-reportes:
+    build:
+      context: ./Backend/restaurant-backend
+      dockerfile: ms-reportes/Dockerfile
+    container_name: restaurant-reportes
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m"
+    ports:
+      - "8085:8085"
+    networks:
+      - restaurant-net
+    depends_on:
+      config-server:
+        condition: service_healthy
+
+  # ── API Gateway ──────────────────────────────────────────────────────────────
+  api-gateway:
+    build:
+      context: ./Backend/restaurant-backend
+      dockerfile: api-gateway/Dockerfile
+    container_name: restaurant-gateway
+    environment:
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m"
+    ports:
+      - "8080:8080"
+    networks:
+      - restaurant-net
+    depends_on:
+      redis:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+
+  # ── Frontend Angular / Ionic ─────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./Front/restaurant-frontend
+      dockerfile: Dockerfile
+    container_name: restaurant-frontend
+    ports:
+      - "4200:80"
+    networks:
+      - restaurant-net
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+
+  # ── Observabilidad ───────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.51.2
+    container_name: restaurant-prometheus
+    ports:
+      - "9090:9090"          # http://localhost:9090
+    volumes:
+      - ./Backend/restaurant-backend/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=7d'
+      - '--web.enable-lifecycle'
+    networks:
+      - restaurant-net
+
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: restaurant-grafana
+    ports:
+      - "3001:3000"          # http://localhost:3001  (admin/admin)
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./Backend/restaurant-backend/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./Backend/restaurant-backend/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - restaurant-net
+    depends_on:
+      - prometheus
+
+  # ── Calidad de código ────────────────────────────────────────────────────────
+  sonarqube:
+    image: sonarqube:10.5-community
+    container_name: restaurant-sonarqube
+    ports:
+      - "9000:9000"          # http://localhost:9000  (admin/admin)
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://postgres:5432/db_sonar
+      SONAR_JDBC_USERNAME: postgres
+      SONAR_JDBC_PASSWORD: postgres
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    ulimits:
+      nofile: { soft: 65536, hard: 65536 }
+    networks:
+      - restaurant-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+# ── Red interna ──────────────────────────────────────────────────────────────
+networks:
+  restaurant-net:
+    driver: bridge
+
+# ── Volúmenes persistentes ───────────────────────────────────────────────────
+volumes:
+  postgres_data:
+  rabbitmq_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+  sonarqube_data:
+  sonarqube_logs:
+  sonarqube_extensions:
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  URLS al levantar:
+#   Frontend     → http://localhost:4200
+#   API Gateway  → http://localhost:8080/swagger-ui.html
+#   Eureka       → http://localhost:8761
+#   RabbitMQ     → http://localhost:15672  (guest/guest)
+#   Prometheus   → http://localhost:9090
+#   Grafana      → http://localhost:3001   (admin/admin)
+#   SonarQube    → http://localhost:9000   (admin/admin)
+#
+#  PRIMER BUILD (~15-20 min por descarga de dependencias Maven/npm):
+#   docker-compose up --build -d
+#
+#  BUILDS SIGUIENTES (rápidos por caché Docker):
+#   docker-compose up -d
+# ═══════════════════════════════════════════════════════════════════════════════

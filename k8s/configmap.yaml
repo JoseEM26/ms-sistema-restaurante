@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: restaurant-config
+  namespace: restaurant
+data:
+  # Base de datos
+  POSTGRES_DB: postgres
+  SPRING_DATASOURCE_USERNAME: postgres
+  DB_AUTH: db_auth
+  DB_MAESTROS: db_maestros
+  DB_VENTAS: db_ventas
+
+  # RabbitMQ
+  SPRING_RABBITMQ_HOST: rabbitmq-service
+  SPRING_RABBITMQ_PORT: "5672"
+
+  # Redis
+  SPRING_DATA_REDIS_HOST: redis-service
+  SPRING_DATA_REDIS_PORT: "6379"
+
+  # Eureka
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:8761/eureka/
+  EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+
+  # Config Server
+  SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+
+  # JVM
+  JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m"

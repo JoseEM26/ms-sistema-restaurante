@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eureka-server
+  namespace: restaurant
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eureka-server
+  template:
+    metadata:
+      labels:
+        app: eureka-server
+    spec:
+      containers:
+        - name: eureka-server
+          image: restaurant/eureka-server:1.0.0
+          ports:
+            - containerPort: 8761
+          env:
+            - name: EUREKA_INSTANCE_HOSTNAME
+              value: eureka-service
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              value: http://eureka-service:8761/eureka/
+            - name: JAVA_TOOL_OPTIONS
+              valueFrom:
+                configMapKeyRef:
+                  name: restaurant-config
+                  key: JAVA_TOOL_OPTIONS
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8761
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8761
+            initialDelaySeconds: 90
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eureka-service
+  namespace: restaurant
+spec:
+  selector:
+    app: eureka-server
+  ports:
+    - port: 8761
+      targetPort: 8761

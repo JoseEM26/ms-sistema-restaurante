@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-maestros
+  namespace: restaurant
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-maestros
+  template:
+    metadata:
+      labels:
+        app: ms-maestros
+    spec:
+      containers:
+        - name: ms-maestros
+          image: restaurant/ms-core-maestros:1.0.0
+          ports:
+            - containerPort: 8082
+          envFrom:
+            - configMapRef:
+                name: restaurant-config
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres-service:5432/db_maestros
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: restaurant-secrets
+                  key: SPRING_DATASOURCE_PASSWORD
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 90
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-maestros-service
+  namespace: restaurant
+spec:
+  selector:
+    app: ms-maestros
+  ports:
+    - port: 8082
+      targetPort: 8082

@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-notif
+  namespace: restaurant
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-notif
+  template:
+    metadata:
+      labels:
+        app: ms-notif
+    spec:
+      containers:
+        - name: ms-notif
+          image: restaurant/ms-notificaciones:1.0.0
+          ports:
+            - containerPort: 8084
+          envFrom:
+            - configMapRef:
+                name: restaurant-config
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8084
+            initialDelaySeconds: 90
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-notif-service
+  namespace: restaurant
+spec:
+  selector:
+    app: ms-notif
+  ports:
+    - port: 8084
+      targetPort: 8084

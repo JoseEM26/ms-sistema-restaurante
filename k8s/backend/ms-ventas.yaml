@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-ventas
+  namespace: restaurant
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-ventas
+  template:
+    metadata:
+      labels:
+        app: ms-ventas
+    spec:
+      containers:
+        - name: ms-ventas
+          image: restaurant/ms-ventas:1.0.0
+          ports:
+            - containerPort: 8083
+          envFrom:
+            - configMapRef:
+                name: restaurant-config
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres-service:5432/db_ventas
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: restaurant-secrets
+                  key: SPRING_DATASOURCE_PASSWORD
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8083
+            initialDelaySeconds: 90
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-ventas-service
+  namespace: restaurant
+spec:
+  selector:
+    app: ms-ventas
+  ports:
+    - port: 8083
+      targetPort: 8083

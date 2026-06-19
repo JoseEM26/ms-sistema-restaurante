@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-reportes
+  namespace: restaurant
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-reportes
+  template:
+    metadata:
+      labels:
+        app: ms-reportes
+    spec:
+      containers:
+        - name: ms-reportes
+          image: restaurant/ms-reportes:1.0.0
+          ports:
+            - containerPort: 8085
+          envFrom:
+            - configMapRef:
+                name: restaurant-config
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8085
+            initialDelaySeconds: 90
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-reportes-service
+  namespace: restaurant
+spec:
+  selector:
+    app: ms-reportes
+  ports:
+    - port: 8085
+      targetPort: 8085

@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-auth
+  namespace: restaurant
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-auth
+  template:
+    metadata:
+      labels:
+        app: ms-auth
+    spec:
+      containers:
+        - name: ms-auth
+          image: restaurant/ms-auth-security:1.0.0
+          ports:
+            - containerPort: 8081
+          envFrom:
+            - configMapRef:
+                name: restaurant-config
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres-service:5432/db_auth
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: restaurant-secrets
+                  key: SPRING_DATASOURCE_PASSWORD
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            initialDelaySeconds: 90
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            initialDelaySeconds: 120
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-auth-service
+  namespace: restaurant
+spec:
+  selector:
+    app: ms-auth
+  ports:
+    - port: 8081
+      targetPort: 8081

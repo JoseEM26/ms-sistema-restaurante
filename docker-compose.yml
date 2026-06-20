@@ -322,26 +322,28 @@ services:
       - prometheus
 
   # ── Calidad de código ────────────────────────────────────────────────────────
-  sonarqube:
-    image: sonarqube:10.5-community
-    container_name: restaurant-sonarqube
-    ports:
-      - "9000:9000"          # http://localhost:9000  (admin/admin)
-    environment:
-      SONAR_JDBC_URL: jdbc:postgresql://postgres:5432/db_sonar
-      SONAR_JDBC_USERNAME: postgres
-      SONAR_JDBC_PASSWORD: postgres
-    volumes:
-      - sonarqube_data:/opt/sonarqube/data
-      - sonarqube_logs:/opt/sonarqube/logs
-      - sonarqube_extensions:/opt/sonarqube/extensions
-    ulimits:
-      nofile: { soft: 65536, hard: 65536 }
-    networks:
-      - restaurant-net
-    depends_on:
-      postgres:
-        condition: service_healthy
+  # SonarQube comentado — pesa 2GB RAM, levantarlo por separado cuando se necesite
+  # Para activar: descomentar este bloque y la entrada sonarqube_* en volumes
+  # sonarqube:
+  #   image: sonarqube:10.5-community
+  #   container_name: restaurant-sonarqube
+  #   ports:
+  #     - "9000:9000"
+  #   environment:
+  #     SONAR_JDBC_URL: jdbc:postgresql://postgres:5432/db_sonar
+  #     SONAR_JDBC_USERNAME: postgres
+  #     SONAR_JDBC_PASSWORD: postgres
+  #   volumes:
+  #     - sonarqube_data:/opt/sonarqube/data
+  #     - sonarqube_logs:/opt/sonarqube/logs
+  #     - sonarqube_extensions:/opt/sonarqube/extensions
+  #   ulimits:
+  #     nofile: { soft: 65536, hard: 65536 }
+  #   networks:
+  #     - restaurant-net
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
 
 # ── Red interna ──────────────────────────────────────────────────────────────
 networks:
@@ -355,9 +357,9 @@ volumes:
   redis_data:
   prometheus_data:
   grafana_data:
-  sonarqube_data:
-  sonarqube_logs:
-  sonarqube_extensions:
+  # sonarqube_data:
+  # sonarqube_logs:
+  # sonarqube_extensions:
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  URLS al levantar:
@@ -367,7 +369,7 @@ volumes:
 #   RabbitMQ     → http://localhost:15672  (guest/guest)
 #   Prometheus   → http://localhost:9090
 #   Grafana      → http://localhost:3001   (admin/admin)
-#   SonarQube    → http://localhost:9000   (admin/admin)
+#   SonarQube    → comentado (pesa 2GB, activar en volumes y services si se necesita)
 #
 #  PRIMER BUILD (~15-20 min por descarga de dependencias Maven/npm):
 #   docker-compose up --build -d

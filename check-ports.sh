@@ -25,7 +25,7 @@ PORTS=(
   "4200:Frontend"
   "9090:Prometheus"
   "3001:Grafana"
-  "9000:SonarQube"
+  # "9000:SonarQube"  (comentado, SonarQube no forma parte del stack por defecto)
 )
 
 RED='\033[0;31m'

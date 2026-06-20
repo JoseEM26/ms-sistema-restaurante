@@ -52,14 +52,15 @@ spec:
   resources:
     requests:
       storage: 256Mi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: sonarqube-pvc
-  namespace: restaurant
-spec:
-  accessModes: [ReadWriteOnce]
-  resources:
-    requests:
-      storage: 2Gi
+# SonarQube PVC comentado — pesa 2GB RAM, activar si se necesita
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: sonarqube-pvc
+#   namespace: restaurant
+# spec:
+#   accessModes: [ReadWriteOnce]
+#   resources:
+#     requests:
+#       storage: 2Gi

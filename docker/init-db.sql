@@ -2,4 +2,4 @@
 CREATE DATABASE db_auth;
 CREATE DATABASE db_maestros;
 CREATE DATABASE db_ventas;
-CREATE DATABASE db_sonar;
+-- CREATE DATABASE db_sonar;  (SonarQube comentado, activar si se usa)

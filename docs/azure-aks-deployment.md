@@ -23,43 +23,93 @@
 
 ## Arquitectura en Azure con AKS
 
+El sistema tiene dos planos: el **plano de despliegue** (cómo llegan las imágenes al cluster)
+y el **plano de tráfico** (cómo fluyen los requests del usuario).
+
+### Plano de despliegue (build → registry → cluster)
+
+```
+Tu código (GitHub)
+       │
+       ▼  GitHub Actions CI/CD
+┌─────────────────────────────────────┐
+│  Azure Container Registry (ACR)     │  ← pago aparte, ~$5/mes
+│  acrrestaurantk8s.azurecr.io        │    guarda las imágenes Docker
+│  ┌────────────────────────────────┐ │    de todos los microservicios
+│  │ ms-auth:1.0.0                 │ │
+│  │ ms-ventas:1.0.0               │ │
+│  │ api-gateway:1.0.0             │ │
+│  │ frontend:1.0.0  ... (9 imgs)  │ │
+│  └────────────────────────────────┘ │
+└──────────────────┬──────────────────┘
+                   │  kubectl pull images
+                   ▼
+         AKS Cluster (los pods descargan
+         sus imágenes desde ACR al arrancar)
+```
+
+### Plano de tráfico (usuario → app)
+
 ```
 Internet
    │
    ▼
-┌─────────────────────────────────────────────────────┐
-│              Azure Front Door (CDN + WAF)            │
-└──────────┬──────────────────────────────┬───────────┘
-           │                              │
-           ▼                              ▼
-   Azure Static Web Apps           AKS Ingress Controller
-   (Angular Frontend)              (nginx-ingress)
-                                         │
-                              ┌──────────▼───────────┐
-                              │   AKS Cluster         │
-                              │   namespace: restaurant│
-                              │                       │
-                              │  ┌─────────────────┐  │
-                              │  │  api-gateway     │  │
-                              │  │  Deployment      │  │
-                              │  └────────┬────────┘  │
-                              │           │            │
-                              │  ┌────────┼──────┐    │
-                              │  ▼        ▼      ▼    │
-                              │ ms-auth ms-maes ms-ven │
-                              │ ms-notif ms-reportes   │
-                              │                       │
-                              │  ┌─────────────────┐  │
-                              │  │ eureka + config  │  │
-                              │  └─────────────────┘  │
-                              └──────────┬────────────┘
-                                         │
-                    ┌────────────────────┼────────────────────┐
-                    ▼                    ▼                     ▼
-             Azure Database          Azure Cache           Azure Service Bus
-             PostgreSQL              for Redis             (o RabbitMQ en K8s)
-             Flexible Server
+┌────────────────────────────────────────────┐
+│         Azure Front Door (CDN + WAF)        │  ← pago aparte, ~$35/mes
+└──────────┬─────────────────────────────────┘
+           │
+           ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│  Azure Load Balancer  (IP pública)                                    │
+│  creado AUTOMÁTICAMENTE por AKS al instalar nginx-ingress             │
+│  INCLUIDO en el costo de AKS (~$18/mes adicional al nodo)            │
+│                                                                       │
+│  ┌────────────────────────────────────────────────────────────────┐  │
+│  │  AKS Cluster  (servicio gestionado de Azure, ~$60/mes)         │  │
+│  │                                                                 │  │
+│  │  ┌──────────────────────────────────────────────────────────┐  │  │
+│  │  │  nginx Ingress Controller  (pods dentro del cluster)      │  │  │
+│  │  │  NO es un servicio Azure separado — corre DENTRO de AKS  │  │  │
+│  │  └──────────────────┬───────────────────────────────────────┘  │  │
+│  │                     │  enruta según la URL                      │  │
+│  │          ┌──────────┴──────────────┐                           │  │
+│  │          ▼                         ▼                           │  │
+│  │  /  → frontend (nginx)      /api → api-gateway                 │  │
+│  │                                    │                           │  │
+│  │                         ┌──────────┼──────────┐               │  │
+│  │                         ▼          ▼          ▼               │  │
+│  │                      ms-auth   ms-ventas  ms-maestros          │  │
+│  │                      ms-notif  ms-reportes                     │  │
+│  │                                                                 │  │
+│  │                      eureka-server  config-server              │  │
+│  │                      (solo red interna, sin Ingress)           │  │
+│  └──────────────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────────────┘
+           │
+           │  red privada (no pasa por internet)
+           ▼
+┌──────────────────────────────────────────────────────┐
+│  Servicios gestionados de Azure (fuera del cluster)  │
+│                                                       │
+│  Azure Database for PostgreSQL    ~$60/mes           │
+│  Azure Cache for Redis            ~$55/mes           │
+│  Azure Service Bus (RabbitMQ)     ~$10/mes           │
+│  Azure Key Vault (secretos)       ~$1/mes            │
+└──────────────────────────────────────────────────────┘
 ```
+
+### Resumen: ¿qué es parte de AKS y qué es pago aparte?
+
+| Componente | ¿Está dentro de AKS? | Costo |
+|---|---|---|
+| **nginx Ingress Controller** | ✅ SÍ — son pods dentro del cluster | Incluido en el nodo AKS |
+| **Azure Load Balancer** | ⚠️ Lo crea AKS automáticamente | ~$18/mes extra (fuera del nodo) |
+| **AKS Cluster (nodos)** | — Es el servicio en sí | ~$60/mes (2 nodos B2s) |
+| **Azure Container Registry** | ❌ NO — servicio separado | ~$5/mes |
+| **Azure Database PostgreSQL** | ❌ NO — servicio separado | ~$60/mes |
+| **Azure Cache for Redis** | ❌ NO — servicio separado | ~$55/mes |
+| **Azure Service Bus** | ❌ NO — servicio separado | ~$10/mes |
+| **Azure Front Door** | ❌ NO — servicio separado (opcional) | ~$35/mes |
 
 ---
 

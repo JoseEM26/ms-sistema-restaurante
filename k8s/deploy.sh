@@ -45,8 +45,7 @@ docker build -t restaurant/ms-core-maestros:1.0.0  ./Backend/restaurant-backend 
 docker build -t restaurant/ms-ventas:1.0.0         ./Backend/restaurant-backend --file Backend/restaurant-backend/ms-ventas/Dockerfile
 docker build -t restaurant/ms-notificaciones:1.0.0 ./Backend/restaurant-backend --file Backend/restaurant-backend/ms-notificaciones/Dockerfile
 docker build -t restaurant/ms-reportes:1.0.0       ./Backend/restaurant-backend --file Backend/restaurant-backend/ms-reportes/Dockerfile
-# [OPCIONAL] Descomentar para incluir el frontend (tarda ~8 min en compilar Angular)
-# docker build -t restaurant/frontend:1.0.0         ./Front/restaurant-frontend
+docker build -t restaurant/frontend:1.0.0         ./Front/restaurant-frontend
 
 echo ""
 echo "Aplicando manifiestos Kubernetes..."
@@ -85,8 +84,8 @@ kubectl apply -f k8s/backend/ms-notif.yaml
 kubectl apply -f k8s/backend/ms-reportes.yaml
 kubectl apply -f k8s/backend/api-gateway.yaml
 
-# 9. [OPCIONAL] Frontend — descomentar para incluir
-# kubectl apply -f k8s/frontend/frontend.yaml
+# 9. Frontend
+kubectl apply -f k8s/frontend/frontend.yaml
 
 # 10. Monitoring
 kubectl apply -f k8s/monitoring/prometheus.yaml

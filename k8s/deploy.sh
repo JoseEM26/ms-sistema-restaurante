@@ -66,16 +66,18 @@ kubectl apply -f k8s/infra/rabbitmq.yaml
 kubectl apply -f k8s/infra/redis.yaml
 
 echo "Esperando que la base de datos esté lista..."
-kubectl wait --for=condition=ready pod -l app=postgres -n restaurant --timeout=120s
+kubectl wait --for=condition=ready pod -l app=postgres   -n restaurant --timeout=120s
+kubectl wait --for=condition=ready pod -l app=rabbitmq   -n restaurant --timeout=180s
+kubectl wait --for=condition=ready pod -l app=redis      -n restaurant --timeout=60s
 
 # 8. Backend
 kubectl apply -f k8s/backend/eureka.yaml
 echo "Esperando Eureka..."
-kubectl wait --for=condition=ready pod -l app=eureka-server -n restaurant --timeout=180s
+kubectl wait --for=condition=ready pod -l app=eureka-server -n restaurant --timeout=300s
 
 kubectl apply -f k8s/backend/config-server.yaml
 echo "Esperando Config Server..."
-kubectl wait --for=condition=ready pod -l app=config-server -n restaurant --timeout=300s
+kubectl wait --for=condition=ready pod -l app=config-server -n restaurant --timeout=360s
 
 kubectl apply -f k8s/backend/ms-auth.yaml
 kubectl apply -f k8s/backend/ms-maestros.yaml

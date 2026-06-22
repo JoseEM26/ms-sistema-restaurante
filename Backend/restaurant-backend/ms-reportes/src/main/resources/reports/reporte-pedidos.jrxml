@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports
+              http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="reporte-pedidos"
+              pageWidth="595" pageHeight="842"
+              columnWidth="555" leftMargin="20" rightMargin="20"
+              topMargin="20" bottomMargin="20">
+
+    <parameter name="TITULO" class="java.lang.String"/>
+    <parameter name="FECHA"  class="java.lang.String"/>
+
+    <!-- Cabecera de página -->
+    <pageHeader>
+        <band height="90">
+            <rectangle>
+                <reportElement x="0" y="0" width="555" height="60" backcolor="#1B5E20" forecolor="#1B5E20"/>
+                <graphicElement>
+                    <pen lineWidth="0"/>
+                </graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="10" y="8" width="400" height="28" forecolor="#FFFFFF"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="18" isBold="true" fontName="DejaVu Sans"/>
+                </textElement>
+                <text><![CDATA[Restaurant Manager]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="10" y="36" width="535" height="18" forecolor="#FFFFFF"/>
+                <textElement>
+                    <font size="10" fontName="DejaVu Sans"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{TITULO} + " — Fecha: " + $P{FECHA}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement x="0" y="70" width="555" height="1" forecolor="#1B5E20"/>
+            </line>
+        </band>
+    </pageHeader>
+
+    <!-- Cuerpo -->
+    <detail>
+        <band height="220">
+            <!-- Encabezados tabla -->
+            <rectangle>
+                <reportElement x="0" y="10" width="555" height="24" backcolor="#F5F5F5" forecolor="#CCCCCC"/>
+            </rectangle>
+            <staticText>
+                <reportElement x="5"   y="15" width="60"  height="14"/>
+                <textElement><font size="9" isBold="true" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[#Pedido]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="70"  y="15" width="80"  height="14"/>
+                <textElement><font size="9" isBold="true" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[Mesa]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="155" y="15" width="160" height="14"/>
+                <textElement><font size="9" isBold="true" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[Productos]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="320" y="15" width="80"  height="14"/>
+                <textElement textAlignment="Center"><font size="9" isBold="true" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[Estado]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="405" y="15" width="145" height="14"/>
+                <textElement textAlignment="Right"><font size="9" isBold="true" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[Total (S/.)]]></text>
+            </staticText>
+
+            <!-- Fila 1 -->
+            <staticText>
+                <reportElement x="5"   y="42" width="60"  height="14"/>
+                <textElement><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[#001]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="70"  y="42" width="80"  height="14"/>
+                <textElement><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[Mesa 3]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="155" y="42" width="160" height="14"/>
+                <textElement><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[Ceviche x2, Chicha x2]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="320" y="42" width="80"  height="14" forecolor="#2E7D32"/>
+                <textElement textAlignment="Center"><font size="9" isBold="true" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[ENTREGADO]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="405" y="42" width="145" height="14"/>
+                <textElement textAlignment="Right"><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[S/. 70.00]]></text>
+            </staticText>
+
+            <!-- Fila 2 -->
+            <staticText>
+                <reportElement x="5"   y="60" width="60"  height="14"/>
+                <textElement><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[#002]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="70"  y="60" width="80"  height="14"/>
+                <textElement><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[Mesa 1]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="155" y="60" width="160" height="14"/>
+                <textElement><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[Lomo saltado x1, Inca Kola x1]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="320" y="60" width="80"  height="14" forecolor="#E65100"/>
+                <textElement textAlignment="Center"><font size="9" isBold="true" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[EN COCINA]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="405" y="60" width="145" height="14"/>
+                <textElement textAlignment="Right"><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[S/. 45.00]]></text>
+            </staticText>
+
+            <!-- Fila 3 -->
+            <staticText>
+                <reportElement x="5"   y="78" width="60"  height="14"/>
+                <textElement><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[#003]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="70"  y="78" width="80"  height="14"/>
+                <textElement><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[Mesa 7]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="155" y="78" width="160" height="14"/>
+                <textElement><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[Ají de gallina x3, Jugos x3]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="320" y="78" width="80"  height="14" forecolor="#2E7D32"/>
+                <textElement textAlignment="Center"><font size="9" isBold="true" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[ENTREGADO]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="405" y="78" width="145" height="14"/>
+                <textElement textAlignment="Right"><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[S/. 120.00]]></text>
+            </staticText>
+
+            <!-- Total -->
+            <line>
+                <reportElement x="0" y="102" width="555" height="1" forecolor="#1B5E20"/>
+            </line>
+            <staticText>
+                <reportElement x="5"   y="108" width="395" height="16"/>
+                <textElement><font size="10" isBold="true" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[TOTAL DEL DÍA]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="405" y="108" width="145" height="16" forecolor="#1B5E20"/>
+                <textElement textAlignment="Right"><font size="10" isBold="true" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[S/. 235.00]]></text>
+            </staticText>
+        </band>
+    </detail>
+
+    <!-- Pie de página -->
+    <pageFooter>
+        <band height="30">
+            <line>
+                <reportElement x="0" y="0" width="555" height="1" forecolor="#CCCCCC"/>
+            </line>
+            <staticText>
+                <reportElement x="0" y="5" width="277" height="20" forecolor="#999999"/>
+                <textElement><font size="8" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[Restaurant Manager — Sistema de Gestión]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="278" y="5" width="277" height="20" forecolor="#999999"/>
+                <textElement textAlignment="Right"><font size="8" fontName="DejaVu Sans"/></textElement>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+</jasperReport>

@@ -44,6 +44,12 @@ export class MaestrosFacade {
   createProducto(data: Producto): void {
     this.adapter.createProducto(data).subscribe({ next: () => this.loadProductos() });
   }
+  updateProducto(id: number, data: Producto): void {
+    this.adapter.updateProducto(id, data).subscribe({ next: () => this.loadProductos() });
+  }
+  deleteProducto(id: number): void {
+    this.adapter.deleteProducto(id).subscribe({ next: () => this.loadProductos() });
+  }
 
   // Mesas
   loadMesas(): void {

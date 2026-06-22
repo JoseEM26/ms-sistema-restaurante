@@ -5,10 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ResourceUtils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +18,11 @@ public class ReporteService {
 
     public byte[] generarPdf(String templateName, Map<String, Object> params, List<?> datos) {
         try {
-            File template = ResourceUtils.getFile("classpath:reports/" + templateName + ".jrxml");
-            JasperReport jasperReport = JasperCompileManager.compileReport(template.getAbsolutePath());
+            InputStream stream = getClass().getResourceAsStream("/reports/" + templateName + ".jrxml");
+            if (stream == null) {
+                throw new RuntimeException("Template no encontrado: " + templateName);
+            }
+            JasperReport jasperReport = JasperCompileManager.compileReport(stream);
 
             JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(datos);
             Map<String, Object> parameters = new HashMap<>(params);
@@ -29,8 +30,6 @@ public class ReporteService {
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
             return JasperExportManager.exportReportToPdf(jasperPrint);
 
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException("Template no encontrado: " + templateName, e);
         } catch (JRException e) {
             throw new RuntimeException("Error al generar PDF: " + e.getMessage(), e);
         }

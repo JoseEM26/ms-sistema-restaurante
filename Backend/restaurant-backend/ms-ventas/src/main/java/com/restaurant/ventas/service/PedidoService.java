@@ -121,17 +121,22 @@ public class PedidoService {
     }
 
     private void publicarEvento(Pedido pedido, String routingKey) {
-        PedidoEvent evento = PedidoEvent.builder()
-                .pedidoId(pedido.getId())
-                .mesaId(pedido.getMesaId())
-                .estado(pedido.getEstado().name())
-                .total(pedido.getTotal())
-                .observaciones(pedido.getObservaciones())
-                .fechaEvento(LocalDateTime.now())
-                .build();
+        try {
+            PedidoEvent evento = PedidoEvent.builder()
+                    .pedidoId(pedido.getId())
+                    .mesaId(pedido.getMesaId())
+                    .estado(pedido.getEstado().name())
+                    .total(pedido.getTotal())
+                    .observaciones(pedido.getObservaciones())
+                    .fechaEvento(LocalDateTime.now())
+                    .build();
 
-        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_PEDIDOS, routingKey, evento);
-        log.info("Evento publicado - routing: {} pedidoId: {}", routingKey, pedido.getId());
+            rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_PEDIDOS, routingKey, evento);
+            log.info("Evento publicado - routing: {} pedidoId: {}", routingKey, pedido.getId());
+        } catch (Exception e) {
+            log.warn("No se pudo publicar evento RabbitMQ (pedidoId={}, routing={}): {}",
+                    pedido.getId(), routingKey, e.getMessage());
+        }
     }
 
     private Pedido findById(Long id) {

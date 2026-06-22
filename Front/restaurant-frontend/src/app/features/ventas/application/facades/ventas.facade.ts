@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { Observable } from 'rxjs';
 import { VentasStoreService } from '../../infrastructure/stores/ventas.store';
 import { VentasHttpAdapter } from '../../infrastructure/adapters/ventas-http.adapter';
 import { Pedido, PedidoRequest } from '../../domain/models/ventas.model';
@@ -22,10 +23,8 @@ export class VentasFacade {
     });
   }
 
-  createPedido(data: PedidoRequest): void {
-    this.adapter.createPedido(data).subscribe({
-      next: () => this.loadPedidos()
-    });
+  createPedido(data: PedidoRequest): Observable<Pedido> {
+    return this.adapter.createPedido(data);
   }
 
   cambiarEstado(id: number, estado: Pedido['estado']): void {

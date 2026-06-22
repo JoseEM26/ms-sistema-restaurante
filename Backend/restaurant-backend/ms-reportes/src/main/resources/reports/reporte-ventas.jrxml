@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports
+              http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="reporte-ventas"
+              pageWidth="595" pageHeight="842"
+              columnWidth="555" leftMargin="20" rightMargin="20"
+              topMargin="20" bottomMargin="20">
+
+    <parameter name="TITULO"  class="java.lang.String"/>
+    <parameter name="PERIODO" class="java.lang.String"/>
+
+    <!-- Cabecera de página -->
+    <pageHeader>
+        <band height="90">
+            <!-- Barra superior -->
+            <rectangle>
+                <reportElement x="0" y="0" width="555" height="60" backcolor="#E65100" forecolor="#E65100"/>
+                <graphicElement>
+                    <pen lineWidth="0"/>
+                </graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="10" y="8" width="400" height="28" forecolor="#FFFFFF"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="18" isBold="true" fontName="DejaVu Sans"/>
+                </textElement>
+                <text><![CDATA[Restaurant Manager]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="10" y="36" width="535" height="18" forecolor="#FFFFFF"/>
+                <textElement>
+                    <font size="10" fontName="DejaVu Sans"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{TITULO} + " — Período: " + $P{PERIODO}]]></textFieldExpression>
+            </textField>
+            <!-- Línea separadora -->
+            <line>
+                <reportElement x="0" y="70" width="555" height="1" forecolor="#E65100"/>
+            </line>
+        </band>
+    </pageHeader>
+
+    <!-- Cuerpo -->
+    <detail>
+        <band height="200">
+            <!-- Tabla de ejemplo -->
+            <!-- Encabezados -->
+            <rectangle>
+                <reportElement x="0" y="10" width="555" height="24" backcolor="#F5F5F5" forecolor="#CCCCCC"/>
+            </rectangle>
+            <staticText>
+                <reportElement x="5"   y="15" width="180" height="14"/>
+                <textElement><font size="9" isBold="true" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[Producto]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="220" y="15" width="100" height="14"/>
+                <textElement textAlignment="Center"><font size="9" isBold="true" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[Cantidad]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="380" y="15" width="170" height="14"/>
+                <textElement textAlignment="Right"><font size="9" isBold="true" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[Total (S/.)]]></text>
+            </staticText>
+
+            <!-- Filas de datos de ejemplo -->
+            <staticText>
+                <reportElement x="5"   y="40" width="180" height="14"/>
+                <textElement><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[Ceviche de pescado]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="220" y="40" width="100" height="14"/>
+                <textElement textAlignment="Center"><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[24]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="380" y="40" width="170" height="14"/>
+                <textElement textAlignment="Right"><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[S/. 840.00]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement x="5"   y="58" width="180" height="14"/>
+                <textElement><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[Lomo saltado]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="220" y="58" width="100" height="14"/>
+                <textElement textAlignment="Center"><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[18]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="380" y="58" width="170" height="14"/>
+                <textElement textAlignment="Right"><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[S/. 720.00]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement x="5"   y="76" width="180" height="14"/>
+                <textElement><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[Ají de gallina]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="220" y="76" width="100" height="14"/>
+                <textElement textAlignment="Center"><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[30]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="380" y="76" width="170" height="14"/>
+                <textElement textAlignment="Right"><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[S/. 900.00]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement x="5"   y="94" width="180" height="14"/>
+                <textElement><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[Arroz con leche]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="220" y="94" width="100" height="14"/>
+                <textElement textAlignment="Center"><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[15]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="380" y="94" width="170" height="14"/>
+                <textElement textAlignment="Right"><font size="9" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[S/. 300.00]]></text>
+            </staticText>
+
+            <!-- Línea total -->
+            <line>
+                <reportElement x="0" y="118" width="555" height="1" forecolor="#E65100"/>
+            </line>
+            <staticText>
+                <reportElement x="5"   y="124" width="370" height="16"/>
+                <textElement><font size="10" isBold="true" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[TOTAL DEL PERÍODO]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="380" y="124" width="170" height="16" forecolor="#E65100"/>
+                <textElement textAlignment="Right"><font size="10" isBold="true" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[S/. 2,760.00]]></text>
+            </staticText>
+        </band>
+    </detail>
+
+    <!-- Pie de página -->
+    <pageFooter>
+        <band height="30">
+            <line>
+                <reportElement x="0" y="0" width="555" height="1" forecolor="#CCCCCC"/>
+            </line>
+            <staticText>
+                <reportElement x="0" y="5" width="277" height="20" forecolor="#999999"/>
+                <textElement><font size="8" fontName="DejaVu Sans"/></textElement>
+                <text><![CDATA[Restaurant Manager — Sistema de Gestión]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="278" y="5" width="277" height="20" forecolor="#999999"/>
+                <textElement textAlignment="Right"><font size="8" fontName="DejaVu Sans"/></textElement>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+</jasperReport>

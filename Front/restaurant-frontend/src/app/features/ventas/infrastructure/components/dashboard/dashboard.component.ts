@@ -1,6 +1,5 @@
 import { Component, OnInit, inject, effect } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { IonContent, IonHeader, IonToolbar, IonTitle } from '@ionic/angular/standalone';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData } from 'chart.js';
 import { format } from 'date-fns';
@@ -12,21 +11,15 @@ import { KpiCardComponent } from '../../../../../shared/components/ui/kpi-card/k
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [DecimalPipe, IonContent, IonHeader, IonToolbar, IonTitle, BaseChartDirective, KpiCardComponent],
+  imports: [DecimalPipe, BaseChartDirective, KpiCardComponent],
+  styles: [`:host { display:block; height:100%; overflow-y:auto; background:#f8fafc; }`],
   template: `
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Dashboard</ion-title>
-      </ion-toolbar>
-    </ion-header>
-
-    <ion-content>
-      <div class="p-4 space-y-6">
+      <div style="padding:24px;display:flex;flex-direction:column;gap:24px">
 
         <!-- Saludo -->
         <div>
-          <h1 class="text-xl font-bold text-slate-800">Buenas, {{ saludo() }} 👋</h1>
-          <p class="text-sm text-slate-500 capitalize">{{ hoy }}</p>
+          <h1 style="font-size:22px;font-weight:800;color:#0f172a;margin:0 0 4px">Buenas, {{ saludo() }} 👋</h1>
+          <p style="font-size:14px;color:#64748b;margin:0;text-transform:capitalize">{{ hoy }}</p>
         </div>
 
         <!-- KPI Cards -->
@@ -85,7 +78,6 @@ import { KpiCardComponent } from '../../../../../shared/components/ui/kpi-card/k
         </div>
 
       </div>
-    </ion-content>
   `
 })
 export class DashboardComponent implements OnInit {

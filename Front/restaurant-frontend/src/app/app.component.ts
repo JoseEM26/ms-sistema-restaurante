@@ -217,6 +217,8 @@ interface NavItem {
       border: 1px solid #f1f3f5;
       overflow: hidden;
       transition: all .15s;
+      text-decoration: none;
+      cursor: pointer;
     }
     .user-row:hover { background: #fff7ed; border-color: #fed7aa; }
 
@@ -327,6 +329,20 @@ interface NavItem {
       0%,100% { opacity: 1; } 50% { opacity: .4; }
     }
 
+    /* Avatar topbar */
+    .topbar-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      color: #fff; font-size: 12px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; cursor: pointer; text-decoration: none;
+      box-shadow: 0 2px 8px rgba(249,115,22,.35);
+      border: 2px solid #fff;
+      outline: 2px solid transparent;
+      transition: all .15s;
+    }
+    .topbar-avatar:hover { outline-color: #f97316; transform: scale(1.05); }
+
     /* ── Contenido ── */
     .content { flex: 1; overflow-y: auto; overflow-x: hidden; }
 
@@ -402,17 +418,29 @@ interface NavItem {
             </a>
           }
 
+          <div class="nav-divider"></div>
+          <p class="nav-group-label">Cuenta</p>
+          @for (item of cuentaNav; track item.path) {
+            <a class="nav-item" [attr.data-label]="item.label"
+               [routerLink]="item.path"
+               routerLinkActive="active"
+               (click)="mobileOpen.set(false)">
+              <span class="nav-icon" [innerHTML]="safeIcon(item.svgPath)"></span>
+              <span class="nav-label-text">{{ item.label }}</span>
+            </a>
+          }
+
         </nav>
 
         <!-- Footer -->
         <div class="sidebar-footer">
-          <div class="user-row">
+          <a class="user-row" routerLink="/perfil" (click)="mobileOpen.set(false)">
             <div class="avatar">{{ initials() }}</div>
             <div class="user-info">
               <strong>{{ auth.currentUser()?.username }}</strong>
               <span>{{ auth.currentUser()?.rol }}</span>
             </div>
-          </div>
+          </a>
           <button class="logout-btn" (click)="auth.logout()">
             <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -452,6 +480,10 @@ interface NavItem {
             <div class="dot"></div>
             En línea
           </div>
+
+          <a routerLink="/perfil" class="topbar-avatar" title="Mi Perfil">
+            {{ initials() }}
+          </a>
         </header>
 
         <!-- Contenido de las páginas -->
@@ -518,6 +550,13 @@ export class AppComponent {
     {
       path: '/reportes', label: 'Reportes PDF', icon: '📊',
       svgPath: `<path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>`
+    }
+  ];
+
+  cuentaNav: NavItem[] = [
+    {
+      path: '/perfil', label: 'Mi Perfil', icon: '👤',
+      svgPath: `<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>`
     }
   ];
 }

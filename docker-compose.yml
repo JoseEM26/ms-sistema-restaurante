@@ -79,7 +79,7 @@ services:
     environment:
       EUREKA_INSTANCE_HOSTNAME: eureka-server
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m"
+      JAVA_TOOL_OPTIONS: "-Xms64m -Xmx384m"
     ports:
       - "8761:8761"
     networks:
@@ -99,7 +99,7 @@ services:
     container_name: restaurant-config
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m"
+      JAVA_TOOL_OPTIONS: "-Xms64m -Xmx384m"
     ports:
       - "8888:8888"
     networks:
@@ -126,13 +126,15 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m"
+      JAVA_TOOL_OPTIONS: "-Xms64m -Xmx384m"
     ports:
       - "8081:8081"
     networks:
       - restaurant-net
     depends_on:
       postgres:
+        condition: service_healthy
+      eureka-server:
         condition: service_healthy
       config-server:
         condition: service_healthy
@@ -155,13 +157,15 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m"
+      JAVA_TOOL_OPTIONS: "-Xms64m -Xmx384m"
     ports:
       - "8082:8082"
     networks:
       - restaurant-net
     depends_on:
       postgres:
+        condition: service_healthy
+      eureka-server:
         condition: service_healthy
       config-server:
         condition: service_healthy
@@ -186,7 +190,7 @@ services:
       SPRING_RABBITMQ_PORT: "5672"
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m"
+      JAVA_TOOL_OPTIONS: "-Xms64m -Xmx384m"
     ports:
       - "8083:8083"
     networks:
@@ -195,6 +199,8 @@ services:
       postgres:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      eureka-server:
         condition: service_healthy
       config-server:
         condition: service_healthy
@@ -216,13 +222,15 @@ services:
       SPRING_RABBITMQ_PORT: "5672"
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m"
+      JAVA_TOOL_OPTIONS: "-Xms64m -Xmx384m"
     ports:
       - "8084:8084"
     networks:
       - restaurant-net
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      eureka-server:
         condition: service_healthy
       config-server:
         condition: service_healthy
@@ -236,12 +244,14 @@ services:
     environment:
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m"
+      JAVA_TOOL_OPTIONS: "-Xms64m -Xmx384m"
     ports:
       - "8085:8085"
     networks:
       - restaurant-net
     depends_on:
+      eureka-server:
+        condition: service_healthy
       config-server:
         condition: service_healthy
 
@@ -256,7 +266,7 @@ services:
       SPRING_DATA_REDIS_PORT: "6379"
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m"
+      JAVA_TOOL_OPTIONS: "-Xms64m -Xmx384m"
     ports:
       - "8080:8080"
     networks:
@@ -287,61 +297,61 @@ services:
       api-gateway:
         condition: service_healthy
 
-  # ── Observabilidad ───────────────────────────────────────────────────────────
-  prometheus:
-    image: prom/prometheus:v2.51.2
-    container_name: restaurant-prometheus
-    ports:
-      - "9090:9090"          # http://localhost:9090
-    volumes:
-      - ./Backend/restaurant-backend/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.retention.time=7d'
-      - '--web.enable-lifecycle'
-    networks:
-      - restaurant-net
+  # ── Observabilidad (deshabilitado — consume demasiada RAM) ───────────────────
+  # prometheus:
+  #   image: prom/prometheus:v2.51.2
+  #   container_name: restaurant-prometheus
+  #   ports:
+  #     - "9090:9090"
+  #   volumes:
+  #     - ./Backend/restaurant-backend/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+  #     - prometheus_data:/prometheus
+  #   command:
+  #     - '--config.file=/etc/prometheus/prometheus.yml'
+  #     - '--storage.tsdb.retention.time=7d'
+  #     - '--web.enable-lifecycle'
+  #   networks:
+  #     - restaurant-net
 
-  grafana:
-    image: grafana/grafana:10.4.2
-    container_name: restaurant-grafana
-    ports:
-      - "3001:3000"          # http://localhost:3001  (admin/admin)
-    environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
-      GF_USERS_ALLOW_SIGN_UP: "false"
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./Backend/restaurant-backend/grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./Backend/restaurant-backend/grafana/dashboards:/var/lib/grafana/dashboards:ro
-    networks:
-      - restaurant-net
-    depends_on:
-      - prometheus
+  # grafana:
+  #   image: grafana/grafana:10.4.2
+  #   container_name: restaurant-grafana
+  #   ports:
+  #     - "3001:3000"
+  #   environment:
+  #     GF_SECURITY_ADMIN_USER: admin
+  #     GF_SECURITY_ADMIN_PASSWORD: admin
+  #     GF_USERS_ALLOW_SIGN_UP: "false"
+  #   volumes:
+  #     - grafana_data:/var/lib/grafana
+  #     - ./Backend/restaurant-backend/grafana/provisioning:/etc/grafana/provisioning:ro
+  #     - ./Backend/restaurant-backend/grafana/dashboards:/var/lib/grafana/dashboards:ro
+  #   networks:
+  #     - restaurant-net
+  #   depends_on:
+  #     - prometheus
 
-  # ── Calidad de código ────────────────────────────────────────────────────────
-  sonarqube:
-    image: sonarqube:10.5-community
-    container_name: restaurant-sonarqube
-    ports:
-      - "9000:9000"          # http://localhost:9000  (admin/admin)
-    environment:
-      SONAR_JDBC_URL: jdbc:postgresql://postgres:5432/db_sonar
-      SONAR_JDBC_USERNAME: postgres
-      SONAR_JDBC_PASSWORD: postgres
-    volumes:
-      - sonarqube_data:/opt/sonarqube/data
-      - sonarqube_logs:/opt/sonarqube/logs
-      - sonarqube_extensions:/opt/sonarqube/extensions
-    ulimits:
-      nofile: { soft: 65536, hard: 65536 }
-    networks:
-      - restaurant-net
-    depends_on:
-      postgres:
-        condition: service_healthy
+  # ── Calidad de código (deshabilitado — consume demasiada RAM) ────────────────
+  # sonarqube:
+  #   image: sonarqube:10.5-community
+  #   container_name: restaurant-sonarqube
+  #   ports:
+  #     - "9000:9000"
+  #   environment:
+  #     SONAR_JDBC_URL: jdbc:postgresql://postgres:5432/db_sonar
+  #     SONAR_JDBC_USERNAME: postgres
+  #     SONAR_JDBC_PASSWORD: postgres
+  #   volumes:
+  #     - sonarqube_data:/opt/sonarqube/data
+  #     - sonarqube_logs:/opt/sonarqube/logs
+  #     - sonarqube_extensions:/opt/sonarqube/extensions
+  #   ulimits:
+  #     nofile: { soft: 65536, hard: 65536 }
+  #   networks:
+  #     - restaurant-net
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
 
 # ── Red interna ──────────────────────────────────────────────────────────────
 networks:
@@ -353,11 +363,11 @@ volumes:
   postgres_data:
   rabbitmq_data:
   redis_data:
-  prometheus_data:
-  grafana_data:
-  sonarqube_data:
-  sonarqube_logs:
-  sonarqube_extensions:
+  # prometheus_data:
+  # grafana_data:
+  # sonarqube_data:
+  # sonarqube_logs:
+  # sonarqube_extensions:
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  URLS al levantar:

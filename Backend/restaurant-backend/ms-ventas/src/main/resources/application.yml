@@ -48,7 +48,6 @@ resilience4j:
         failureRateThreshold: 50
         waitDurationInOpenState: 10s
 
-spring:
   cloud:
     openfeign:
       httpclient:

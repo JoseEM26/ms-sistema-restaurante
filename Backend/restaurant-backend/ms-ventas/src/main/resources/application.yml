@@ -48,9 +48,14 @@ resilience4j:
         failureRateThreshold: 50
         waitDurationInOpenState: 10s
 
-feign:
-  circuitbreaker:
-    enabled: true
+spring:
+  cloud:
+    openfeign:
+      httpclient:
+        hc5:
+          enabled: true
+      circuitbreaker:
+        enabled: true
 
 springdoc:
   api-docs:

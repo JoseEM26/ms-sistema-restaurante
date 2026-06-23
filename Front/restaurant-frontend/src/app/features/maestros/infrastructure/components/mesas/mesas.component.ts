@@ -220,9 +220,9 @@ const TABLE_H = 130;
             <span class="chip chip-ocupada">
               <span class="dot"></span>{{ contar('OCUPADA') }} Ocupadas
             </span>
-            <span class="chip chip-reservada">
+            <!-- <span class="chip chip-reservada">
               <span class="dot"></span>{{ contar('RESERVADA') }} Reservadas
-            </span>
+            </span> -->
           </div>
         </div>
 

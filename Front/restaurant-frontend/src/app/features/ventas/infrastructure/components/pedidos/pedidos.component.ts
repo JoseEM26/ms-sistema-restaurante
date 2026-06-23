@@ -348,7 +348,7 @@ export class PedidosComponent implements OnInit {
       },
       error: (err) => {
         this.guardando.set(false);
-        const msg = err?.error?.message ?? err?.message ?? 'Error al crear el pedido. Verifica que el servidor esté disponible.';
+        const msg = err?.error?.error ?? err?.error?.message ?? err?.message ?? 'Error al crear el pedido. Verifica que el servidor esté disponible.';
         this.errorForm.set(msg);
       }
     });

@@ -37,6 +37,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiResponse<Void> handleGeneral(Exception ex) {
-        return ApiResponse.error("Error interno: " + ex.getMessage());
+        ex.printStackTrace(); // Added for debugging
+        String cause = ex.getCause() != null ? ex.getCause().getMessage() : "N/A";
+        String detailedMsg = "Error interno: [" + ex.getClass().getSimpleName() + "] " + ex.getMessage() + " | Causa: " + cause;
+        return ApiResponse.error(detailedMsg);
     }
 }
